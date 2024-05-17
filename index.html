@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+    <style>
+
+    </style>
+</head>
+
+<body>
+
+    <video autoplay muted loop id="video-background">
+        <source src="startvid.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div id="startScreen" style="width: 750px; height: 500px;">
+        <h1 style="font-size: 90px; color: rgb(165, 42, 144); "><b>RUN</b></h1>
+        <p style="font-size: 35px; color: rgb(175, 3, 223);" >
+            Steuerung: <br>
+            Links: A <br>
+            Rechts: D <br>
+        </p>
+        <p>Für bestes Erlebnis in den Vollbildmodus wechseln</p>
+
+          <div class="btn btn-two" onclick="startGame()">
+            <span></span>
+          </div>
+   
+    </div>
+
+    <canvas id="Canvas01"></canvas>
+
+    <audio id="bm" src="bm.mp3"></audio>
+    <audio id="sp" src="sp.mp3"></audio>
+    <audio id="hit" src="hit.mp3"></audio>
+    <audio id="audioR" src="r.mp3"></audio>
+    <audio id="wait" src="wait.mp3" autoplay></audio>
+
+    <script>
+
+        const canvas = document.getElementById("Canvas01");
+        const fenster = canvas.getContext('2d')
+
+        let bm = document.getElementById('bm');
+        let sp = document.getElementById('sp');
+        let hits = document.getElementById('hit');
+        let wait = document.getElementById('wait');
+
+        let audioR = document.getElementById('audioR');
+
+        function playAudioR() {
+            audioR.play();
+        }
+
+        function stopAudioR() {
+            audioR.pause();
+        }
+
+        audioR.volume = 1;
+
+        let gegArray = [];
+
+        let heartnum1 = 15;
+        let heartnum2 = 19;
+        let Freeheart_active = false;
+        let ftime1 = 5;
+        let ftime2 = 7;
+        let a = true;
+        let at = false;
+
+        let canHeartFail = true;
+
+        for (let i = 0; i < 3; i++) {
+            let geg = {
+                x: Math.random() * (canvas.width - 50),
+                y: -50 * i,
+                speed_x: 5,
+                speed_y: 5,
+                breite: 70,
+                hoehe: 85,
+                farbe: "rgba(0, 0, 0, 0)",
+            };
+            gegArray.push(geg);
+        }
+
+        let gegLinks = {
+            x: Math.random() * canvas.width,
+            y: 0,
+            speed_x: 5,
+            speed_y: 5,
+            breite: 70,
+            hoehe: 85,
+            farbe: "rgba(0, 0, 0, 0)",
+        };
+
+        let gegRechts = {
+            x: Math.random() * canvas.width,
+            y: 0,
+            speed_x: 5,
+            speed_y: 5,
+            breite: 70,
+            hoehe: 85,
+            farbe: "rgba(0, 0, 0, 0)",
+        };
+
+
+        let freeheart = {
+            x: Math.random() * canvas.width,
+            y: -180,
+            speed_y: 5,
+            breite: 200,
+            hoehe: 200,
+            farbe: "rgba(0, 0, 0, 0)",
+        };
+
+
+
+        let r1 = {
+            x: canvas.width / 2,
+            speed_x: 20,
+            y: canvas.height - 320,
+            breite: 100,
+            hoehe: 120,
+            farbe: "grey"
+        };
+
+        let bild01 = {
+            breite: 150,
+            hoehe: 125
+        };
+
+        let bild03 = {
+            breite: 125,
+            hoehe: 230
+        };
+
+        let druckRechts = false;
+        let druckLinks = false;
+
+        let ttospeed = 5
+        let speed_uni = 6
+        
+
+        let zeichnung01 = new Image();
+        zeichnung01.src = "imgs/bg1.jpg";
+
+        let zeichnung02 = new Image();
+        zeichnung02.src = "imgs/anil/Idle__000.png";
+
+        let zeichnung03 = new Image();
+        zeichnung03.src = "imgs/ani/Idle__000.png";
+
+        let zeichenenGeg = new Image();
+        zeichenenGeg.src = "imgs/geg.png";
+
+        let zeichenenGegl = new Image();
+        zeichenenGegl.src = "imgs/gegl.png";
+
+        let herzzeichnen = new Image();
+        herzzeichnen.src = "imgs/herz.png";
+
+        let freeherzzeichnen = new Image();
+        freeherzzeichnen.src = "imgs/freeh.png";
+
+        let zeitlzeichnen = new Image();
+        //Bildnachweiß: https://www.freepik.com/
+        zeitlzeichnen.src = "imgs/zeit.png";
+
+
+        let animationFramesRight = [];
+        let animationFramesLeft = [];
+        let currentFrame = 0;
+        let isRunningRight = false;
+        let isRunningLeft = false;
+        let sl = false;
+
+        let universal_herz = {
+            hoehe: 100,
+            breite: 100,
+        };
+        console.log(canvas.height);
+
+       
+        let herz1 = {
+            status: true,
+            x: 190,
+            y: 30,
+        };
+
+        let herz2 = {
+            status: true,
+            x: 100,
+            y: 30,
+        };
+
+        let herz3 = {
+            status: true,
+            x: 10,
+            y: 30,
+        };
+
+        let frame = {
+            breite: 200,
+            hoehe: 230,
+            x: 30,
+        };
+
+        for (let i = 0; i < 10; i++) {
+            let frameRight = new Image();
+            frameRight.src = "imgs/ani/Run__00" + i + ".png";
+            animationFramesRight.push(frameRight);
+
+            let frameLeft = new Image();
+            frameLeft.src = "imgs/anil/Run__00" + i + "_ji.png";
+            animationFramesLeft.push(frameLeft);
+            frameRight = {
+                breite: 150,
+                hoehe: 230
+            };
+        }
+
+        document.addEventListener("keydown", tasteDruecken);
+        document.addEventListener("keyup", tasteLoslassen);
+
+        function startAnimationRight() {
+            if (!isRunningRight) {
+                isRunningRight = true;
+                animateFramesRight();
+            }
+        }
+
+        function animateFramesRight() {
+            currentFrame = (currentFrame + 1) % animationFramesRight.length;
+
+            if (isRunningRight) {
+                requestAnimationFrame(animateFramesRight);
+            }
+        }
+
+        function stopAnimationRight() {
+            isRunningRight = false;
+            currentFrame = 0;
+        }
+
+        function startAnimationLeft() {
+            if (!isRunningLeft) {
+                isRunningLeft = true;
+                animateFramesLeft();
+            }
+        }
+
+        function animateFramesLeft() {
+            currentFrame = (currentFrame + 1) % animationFramesLeft.length;
+
+            if (isRunningLeft) {
+                requestAnimationFrame(animateFramesLeft);
+            }
+        }
+
+        function stopAnimationLeft() {
+            isRunningLeft = false;
+            currentFrame = 0;
+        }
+
+        function tasteDruecken(event) {
+            if (event.key == "d" || event.key == "D") {
+                druckRechts = true;
+                startAnimationRight();
+                playAudioR();
+            }
+            if (event.key == "a" || event.key == "A") {
+                druckLinks = true;
+                startAnimationLeft();
+                playAudioR();
+            }
+        }
+
+        function tasteLoslassen(event) {
+            if (event.key == "d" || event.key == "D") {
+                druckRechts = false;
+                stopAnimationRight();
+                stopAudioR();
+            }
+            if (event.key == "a" || event.key == "A") {
+                druckLinks = false;
+                stopAnimationLeft();
+                stopAudioR();
+            }
+        }
+
+        function zeichne() {
+            fenster.drawImage(zeichnung01, 0, 0, canvas.width, canvas.height);
+
+            fenster.fillStyle = gegLinks.farbe;
+            fenster.fillRect(gegLinks.x, gegLinks.y, gegLinks.breite, gegLinks.hoehe);
+
+            fenster.fillStyle = gegRechts.farbe;
+            fenster.fillRect(gegRechts.x, gegRechts.y, gegRechts.breite, gegRechts.hoehe);
+          
+
+
+            fenster.fillStyle = r1.farbe;
+            fenster.fillRect(r1.x, r1.y - 100, r1.breite, r1.hoehe);
+            fenster.drawImage(zeichnung01, 0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < gegArray.length; i++) {
+                let geg = gegArray[i];
+                fenster.fillStyle = geg.farbe;
+                fenster.fillRect(geg.x, geg.y, geg.breite, geg.hoehe);
+                fenster.drawImage(zeichenenGeg, geg.x, geg.y, geg.breite, geg.hoehe);
+            }
+
+
+            fenster.drawImage(zeichenenGegl, gegLinks.x, gegLinks.y, gegLinks.breite, gegLinks.hoehe);
+            fenster.drawImage(zeichenenGegl, gegRechts.x, gegRechts.y, gegRechts.breite, gegRechts.hoehe);
+            fenster.drawImage(freeherzzeichnen, freeheart.x, freeheart.y, freeheart.breite, freeheart.hoehe);
+          
+            if (herz1.status) {
+                fenster.drawImage(herzzeichnen, herz1.x, herz1.y, universal_herz.breite, universal_herz.hoehe);
+            }
+            if (herz2.status) {
+                fenster.drawImage(herzzeichnen, herz2.x, herz2.y, universal_herz.breite, universal_herz.hoehe);
+            }
+            if (herz3.status) {
+                fenster.drawImage(herzzeichnen, herz3.x, herz3.y, universal_herz.breite, universal_herz.hoehe);
+            }
+
+            if (isRunningRight) {
+                fenster.drawImage(animationFramesRight[currentFrame], r1.x , r1.y - 100, frame.breite, frame.hoehe);
+                sl = false;
+            } else if (isRunningLeft) {
+                fenster.drawImage(animationFramesLeft[currentFrame], r1.x , r1.y - 100, frame.breite, frame.hoehe);
+                sl = true;
+            } else if (sl == true) {
+                fenster.drawImage(zeichnung02, r1.x , r1.y - 100, bild03.breite, bild03.hoehe);
+            } else {
+                fenster.drawImage(zeichnung03, r1.x , r1.y - 100, bild03.breite, bild03.hoehe);
+            }
+        }
+
+        class Timer {
+            constructor() {
+                this.isRunning = false;
+                this.startTime = 0;
+                this.overallTime = 0;
+                this.currentTime = 0; 
+            }
+
+            _getTimeElapsedSinceLastStart() {
+                if (!this.startTime) {
+                    return 0;
+                }
+
+                return Date.now() - this.startTime;
+            }
+
+            start() {
+                if (this.isRunning) {
+                    return console.error('Timer is already running');
+                }
+
+                this.isRunning = true;
+
+                this.startTime = Date.now();
+            }
+
+            stop() {
+                if (!this.isRunning) {
+                    return console.error('Timer is already stopped');
+                }
+
+                this.isRunning = false;
+
+                this.overallTime = this.overallTime + this._getTimeElapsedSinceLastStart();
+                this.currentTime = this.overallTime; 
+            }
+
+            reset() {
+                this.overallTime = 0;
+
+                if (this.isRunning) {
+                    this.startTime = Date.now();
+                    return;
+                }
+
+                this.startTime = 0;
+                this.currentTime = 0; 
+            }
+
+            getTime() {
+                if (!this.startTime) {
+                    return 0;
+                }
+
+                if (this.isRunning) {
+                    return this.overallTime + this._getTimeElapsedSinceLastStart();
+                }
+                
+
+                return this.currentTime; 
+            }
+        }
+
+        const timer = new Timer();
+
+        function startTimer() {
+            timer.start();
+        }
+
+        function stopTimer() {
+            timer.stop();
+        }
+
+        setInterval(() => {
+            const timeInSeconds = Math.round(timer.getTime() / 1000);
+            localStorage.setItem('timeInSeconds', timeInSeconds);
+        }, 100)
+ 
+
+
+        function berechneGegner() {
+            for (let i = 0; i < gegArray.length; i++) {
+                let geg = gegArray[i];
+                geg.x -= geg.speed_x;
+                geg.y += geg.speed_y;
+
+                if (geg.y > canvas.height) {
+                    geg.x = Math.random() * (canvas.width - 50);
+                    geg.y = -50 * i;
+                }
+            }
+
+            gegLinks.x += gegLinks.speed_x;
+            gegLinks.y += gegLinks.speed_y;
+
+            gegRechts.x += gegRechts.speed_x;
+            gegRechts.y += gegRechts.speed_y;
+
+            if (gegLinks.x > canvas.width) {
+                gegLinks.x = Math.random() * canvas.width;
+                gegLinks.y = 0;
+            }
+
+            if (gegRechts.x > canvas.width) {
+                gegRechts.x = Math.random() * canvas.width;
+                gegRechts.y = 0;
+            }
+            //herz launch
+            const needheartt = parseInt(localStorage.getItem('timeInSeconds'));
+
+            if (needheartt > heartnum1) {
+                freeheart.y += 5;
+            }
+
+            if (needheartt > heartnum2) {
+                heartnum1 += 15;
+                heartnum2 += 19;
+                freeheart.x = Math.random() * canvas.width;
+                freeheart.y = -180;
+            }
+            if (!Freeheart_active && r1.x < freeheart.x + freeheart.breite && r1.x + r1.breite > freeheart.x && r1.y < freeheart.y + freeheart.hoehe && r1.y + r1.hoehe > freeheart.y)
+               {   
+                console.log("Freeheart active");
+                Freeheart_active = true;
+                freeheart.y = -5000;
+
+                if (!herz1.status && herz2.status){
+                    herz1.status = true;
+                }; 
+
+                if (herz3.status && !herz2.status){
+                    herz2.status = true;
+                };
+                      
+                }
+            if (Freeheart_active && !(r1.x < freeheart.x + freeheart.breite && r1.x + r1.breite > freeheart.x && r1.y < freeheart.y + freeheart.hoehe && r1.y + r1.hoehe > freeheart.y))
+               {   
+                Freeheart_active = false;                     
+                }
+             }
+
+        function heartfail(){
+            if (!herz1.status && !herz2.status){
+                herz3.status = false;
+                hits.play();
+            };
+            if (!herz1.status && herz2.status){
+                herz2.status = false;
+                hits.play();
+            };
+            if (herz1.status){
+                herz1.status = false;
+                hits.play();
+            };                         
+        }
+
+
+
+
+        function berechne() {
+            berechneGegner();
+
+                if (!herz1.status && !herz2.status && !herz3.status) {
+                clearInterval(wdh_spiel); 
+                stopTimer();
+                canvas.style.display = "none"; 
+                window.location.href = "go.html";
+            }
+            if (canHeartFail && ((r1.x < gegLinks.x + gegLinks.breite && r1.x + r1.breite > gegLinks.x && r1.y < gegLinks.y + gegLinks.hoehe && r1.y + r1.hoehe > gegLinks.y) || 
+            (r1.x < gegRechts.x + gegRechts.breite && r1.x + r1.breite > gegRechts.x && r1.y < gegRechts.y + gegRechts.hoehe && r1.y + r1.hoehe > gegRechts.y) || 
+            gegArray.some(obj => r1.x < obj.x + obj.breite && r1.x + r1.breite > obj.x && r1.y < obj.y + obj.hoehe && r1.y + r1.hoehe > obj.y))) {
+                heartfail();
+                canHeartFail = false;
+                gegLinks.y = -500;
+                gegRechts.y = -500;
+                for (let i = 0; i < gegArray.length; i++) {
+                let geg = gegArray[i];
+                geg.y = -500;
+            }
+            } else if (!canHeartFail && !(r1.x < gegLinks.x + gegLinks.breite && r1.x + r1.breite > gegLinks.x && r1.y < gegLinks.y + gegLinks.hoehe && r1.y + r1.hoehe > gegLinks.y) && 
+            !(r1.x < gegRechts.x + gegRechts.breite && r1.x + r1.breite > gegRechts.x && r1.y < gegRechts.y + gegRechts.hoehe && r1.y + r1.hoehe > gegRechts.y) && 
+            !gegArray.some(obj => r1.x < obj.x + obj.breite && r1.x + r1.breite > obj.x && r1.y < obj.y + obj.hoehe && r1.y + r1.hoehe > obj.y)) {
+                canHeartFail = true;
+            }
+            
+            r1.x = r1.x + r1.speed_x * (druckRechts ? 1 : 0) - r1.speed_x * (druckLinks ? 1 : 0);
+
+
+            if (r1.x > canvas.width - r1.breite - 110) {
+                r1.x = canvas.width - r1.breite - 110;
+            }
+            if (r1.x < 0) {
+                r1.x = 10;
+            }
+            
+
+
+
+            
+        }
+
+        function onResize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            r1.y = canvas.height - r1.hoehe;
+        }
+
+        function start() {
+            window.addEventListener('resize', onResize);
+            onResize();
+          
+            showStartScreen();
+        }
+
+        function showStartScreen() {
+            document.getElementById("startScreen").style.display = "block";
+        }
+
+   
+        function startGame() {
+            hideStartScreen();
+            document.getElementById("video-background").style.display = "none";
+            wait.pause()
+            bm.play();
+            wdh_spiel = setInterval(spiel, 1000 / 60);
+            startTimer();
+            startSpeedIncreaseTimer(); 
+
+        }
+
+        function hideStartScreen() {
+            document.getElementById("startScreen").style.display = "none";
+        }
+
+        function spiel() {
+            zeichne();
+            berechne();
+        }
+
+        function increaseSpeed() {
+            gegArray.forEach(geg => {
+                geg.speed_x += 1; 
+                geg.speed_y += 1; 
+            });
+
+            gegLinks.speed_x += 1; 
+            gegLinks.speed_y += 1; 
+
+            gegRechts.speed_x += 1; 
+            gegRechts.speed_y += 1; 
+        }
+
+       
+        let speedIncreaseTimer;
+
+        function startSpeedIncreaseTimer() {
+            speedIncreaseTimer = setInterval(increaseSpeed, 5000); 
+        }
+        function stopSpeedIncreaseTimer() {
+            clearInterval(speedIncreaseTimer);
+        }
+
+        start();
+    </script>
+</body>
+
+</html>

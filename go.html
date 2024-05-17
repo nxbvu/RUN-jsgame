@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Over</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <video autoplay muted loop id="video-background">
+        <source src="startvid.mp4" type="video/mp4">
+        Your browser does not support the video background.
+    </video>
+
+    <div id="div2" onclick="restartGame()">
+        <h1 style="font-size: 88px;color: rgb(165, 42, 144);">Game Over</h1>
+        <p id="timeElapsedParagraph" style="font-size: 50px;color: rgb(125, 17, 155);"></p>
+        <p style="font-size: 50px;color: rgb(175, 3, 223);"> Neustart</p>
+        
+    </div>
+    <audio id="wait" src="wait.mp3"></audio>
+
+    <script>
+        function restartGame() {
+            window.location.href = "index.html";
+        }
+        let wait = document.getElementById("wait");
+        wait.play();
+        const timeInSeconds = localStorage.getItem('timeInSeconds');
+
+
+        const timeElapsedParagraph = document.getElementById('timeElapsedParagraph');
+        timeElapsedParagraph.textContent = ` ${timeInSeconds} Punkte`;
+    </script>
+</body>
+
+</html>
